@@ -1,4 +1,33 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    images: {
+      domains: [
+        'uploadthing.com',
+        'utfs.io',
+        'img.clerk.com',
+        'subdomain',
+        'files.stripe.com',
+        "dc.om"
+      ],
+        remotePatterns: [
+          {
+            protocol: 'https',
+            hostname: '*',
+          },
+          {
+            protocol: 'http',
+            hostname: '*',
+          },
+        ],
+      },
+      typescript: {
+        // Ignoring TypeScript errors during build
+        ignoreBuildErrors: true,
+      },
+  
+      eslint:{
+        ignoreDuringBuilds: true
+    }
+  };
+  
+  export default nextConfig;

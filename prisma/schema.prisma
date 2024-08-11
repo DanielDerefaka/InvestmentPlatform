@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String               @id @default(uuid())
+  fullname          String             @unique
+  clerkId   String   @unique
+  email   String   @unique
+  password      String
+  type      String
+  balance           Float              @default(0)
+  kycApproved       Boolean            @default(false)
+  role      Role   @default(USER)
+  profile           Profile?
+  transactions      Transaction[]
+  deposits          Deposit[]
+  withdrawals       Withdrawal[]
+  investments       Investment[]
+  referrals         Referral[]         @relation("Referrer")
+  referredBy        Referral?          @relation("Referred")
+  notifications     Notification[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model Profile {
+  id               String    @id @default(uuid())
+  user             User     @relation(fields: [userId], references: [id])
+  userId           String      @unique
+  fullName         String?
+  address          String?
+  phoneNumber      String?
+  walletAddress    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Transaction {
+  id          String      @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  amount      Float
+  type        TransactionType   // 'deposit', 'withdrawal', 'investment'
+  status      TransactionStatus
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Deposit {
+  id          String     @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  amount      Float
+  currency    String
+  status      TransactionStatus   // 'pending', 'completed', 'failed'
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Withdrawal {
+  id             String     @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+  amount         Float
+  walletAddress  String
+  status         TransactionStatus   // 'pending', 'completed', 'failed'
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Investment {
+  id          String      @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  plan        Plan     @relation(fields: [planId], references: [id])
+  planId      String
+  amount      Float
+  status      String   // 'active', 'completed', 'cancelled'
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Plan {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  minAmount   Float
+  maxAmount   Float
+  duration    Int          // in days
+  interestRate Float
+  investments Investment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Referral {
+  id          String      @id @default(uuid())
+  referrer    User     @relation("Referrer", fields: [referrerId], references: [id])
+  referrerId  String
+  referred    User     @relation("Referred", fields: [referredId], references: [id])
+  referredId  String      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String      @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  username  String    @unique
+  role      Role   @default(ADMIN)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+
+model SiteSetting {
+  id                String      @id @default(uuid())
+  kycEnabled        Boolean  @default(true)
+  logo              String?
+  enabledPayments   String[]
+  emailSmtp         Json?
+  referralReward    Float?
+  tawkApiKey        String?
+  themeSettings     Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Currency {
+  id        String     @id @default(uuid())
+  name      String
+  symbol    String
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Page {
+  id        String     @id @default(uuid())
+  title     String
+  content   String
+  slug      String   @unique
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmailTemplate {
+  id        String     @id @default(uuid())
+  name      String
+  subject   String
+  content   String
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  INVESTMENT 
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}

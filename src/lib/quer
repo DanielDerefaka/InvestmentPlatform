@@ -1,0 +1,283 @@
+// queries.ts
+
+"use server";
+
+import { clerkClient, currentUser } from "@clerk/nextjs";
+import { PrismaClient, TransactionType, TransactionStatus, Role } from '@prisma/client';
+import debug from 'debug';
+
+const log = debug('app:queries');
+const prisma = new PrismaClient();
+
+// User queries
+export const createUser = async (userData: {
+  fullname: string;
+  clerkId: string;
+  email: string;
+  password: string;
+  type: string;
+}) => {
+  log('Creating new user:', userData.email);
+  try {
+    const user = await prisma.user.create({
+      data: userData,
+    });
+    log('User created successfully:', user.id);
+    return user;
+  } catch (error) {
+    log('Error creating user:', error);
+    throw error;
+  }
+};
+
+export const getUserById = async (id: string) => {
+  log('Fetching user by id:', id);
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { profile: true },
+    });
+    log('User fetched:', user ? user.id : 'Not found');
+    return user;
+  } catch (error) {
+    log('Error fetching user:', error);
+    throw error;
+  }
+};
+
+export const updateUserBalance = async (userId: string, amount: number) => {
+  log('Updating user balance:', userId, amount);
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { balance: { increment: amount } },
+    });
+    log('User balance updated:', user.id, user.balance);
+    return user;
+  } catch (error) {
+    log('Error updating user balance:', error);
+    throw error;
+  }
+};
+
+// Transaction queries
+export const createTransaction = async (transactionData: {
+  userId: string;
+  amount: number;
+  type: TransactionType;
+  status: TransactionStatus;
+}) => {
+  log('Creating new transaction:', transactionData);
+  try {
+    const transaction = await prisma.transaction.create({
+      data: transactionData,
+    });
+    log('Transaction created:', transaction.id);
+    return transaction;
+  } catch (error) {
+    log('Error creating transaction:', error);
+    throw error;
+  }
+};
+
+// Deposit queries
+export const createDeposit = async (depositData: {
+  userId: string;
+  amount: number;
+  currency: string;
+  status: TransactionStatus;
+}) => {
+  log('Creating new deposit:', depositData);
+  try {
+    const deposit = await prisma.deposit.create({
+      data: depositData,
+    });
+    log('Deposit created:', deposit.id);
+    return deposit;
+  } catch (error) {
+    log('Error creating deposit:', error);
+    throw error;
+  }
+};
+
+// Withdrawal queries
+export const createWithdrawal = async (withdrawalData: {
+  userId: string;
+  amount: number;
+  walletAddress: string;
+  status: TransactionStatus;
+}) => {
+  log('Creating new withdrawal:', withdrawalData);
+  try {
+    const withdrawal = await prisma.withdrawal.create({
+      data: withdrawalData,
+    });
+    log('Withdrawal created:', withdrawal.id);
+    return withdrawal;
+  } catch (error) {
+    log('Error creating withdrawal:', error);
+    throw error;
+  }
+};
+
+// Investment queries
+export const createInvestment = async (investmentData: {
+  userId: string;
+  planId: string;
+  amount: number;
+  status: string;
+}) => {
+  log('Creating new investment:', investmentData);
+  try {
+    const investment = await prisma.investment.create({
+      data: investmentData,
+    });
+    log('Investment created:', investment.id);
+    return investment;
+  } catch (error) {
+    log('Error creating investment:', error);
+    throw error;
+  }
+};
+
+export const getInvestmentsByUserId = async (userId: string) => {
+  log('Fetching investments for user:', userId);
+  try {
+    const investments = await prisma.investment.findMany({
+      where: { userId },
+      include: { plan: true },
+    });
+    log('Investments fetched:', investments.length);
+    return investments;
+  } catch (error) {
+    log('Error fetching investments:', error);
+    throw error;
+  }
+};
+
+// Plan queries
+export const getAllPlans = async () => {
+  log('Fetching all plans');
+  try {
+    const plans = await prisma.plan.findMany();
+    log('Plans fetched:', plans.length);
+    return plans;
+  } catch (error) {
+    log('Error fetching plans:', error);
+    throw error;
+  }
+};
+
+// Referral queries
+export const createReferral = async (referrerId: string, referredId: string) => {
+  log('Creating new referral:', referrerId, referredId);
+  try {
+    const referral = await prisma.referral.create({
+      data: {
+        referrerId,
+        referredId,
+      },
+    });
+    log('Referral created:', referral.id);
+    return referral;
+  } catch (error) {
+    log('Error creating referral:', error);
+    throw error;
+  }
+};
+
+// Notification queries
+export const createNotification = async (notificationData: {
+  userId: string;
+  message: string;
+}) => {
+  log('Creating new notification:', notificationData);
+  try {
+    const notification = await prisma.notification.create({
+      data: notificationData,
+    });
+    log('Notification created:', notification.id);
+    return notification;
+  } catch (error) {
+    log('Error creating notification:', error);
+    throw error;
+  }
+};
+
+export const getUnreadNotifications = async (userId: string) => {
+  log('Fetching unread notifications for user:', userId);
+  try {
+    const notifications = await prisma.notification.findMany({
+      where: { userId, isRead: false },
+    });
+    log('Unread notifications fetched:', notifications.length);
+    return notifications;
+  } catch (error) {
+    log('Error fetching unread notifications:', error);
+    throw error;
+  }
+};
+
+// Admin queries
+export const createAdmin = async (adminData: {
+  email: string;
+  password: string;
+  username: string;
+}) => {
+  log('Creating new admin:', adminData.email);
+  try {
+    const admin = await prisma.admin.create({
+      data: {
+        ...adminData,
+        role: Role.ADMIN,
+      },
+    });
+    log('Admin created:', admin.id);
+    return admin;
+  } catch (error) {
+    log('Error creating admin:', error);
+    throw error;
+  }
+};
+
+// Site Settings queries
+export const getSiteSettings = async () => {
+  log('Fetching site settings');
+  try {
+    const settings = await prisma.siteSetting.findFirst();
+    log('Site settings fetched:', settings ? settings.id : 'Not found');
+    return settings;
+  } catch (error) {
+    log('Error fetching site settings:', error);
+    throw error;
+  }
+};
+
+export const updateSiteSettings = async (settingsData: {
+  kycEnabled?: boolean;
+  logo?: string;
+  enabledPayments?: string[];
+  emailSmtp?: any;
+  referralReward?: number;
+  tawkApiKey?: string;
+  themeSettings?: any;
+}) => {
+  log('Updating site settings');
+  try {
+    const settings = await prisma.siteSetting.update({
+      where: { id: '1' }, // Assuming there's only one site settings record
+      data: settingsData,
+    });
+    log('Site settings updated:', settings.id);
+    return settings;
+  } catch (error) {
+    log('Error updating site settings:', error);
+    throw error;
+  }
+};
+
+// Don't forget to close the Prisma client connection when your app shuts down
+process.on('beforeExit', () => {
+  log('Closing Prisma client connection');
+  prisma.$disconnect();
+});
