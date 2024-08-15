@@ -25,6 +25,12 @@ async beforeAuth(auth, req) {},
         return NextResponse.redirect(new URL(`/auth/sign-in`, req.url))
       }
 
+      if (url.pathname === '/admin/sign-in' || url.pathname === '/admin/sign-up') {
+        return NextResponse.redirect(new URL(`auth/admin/auth/sign-in`, req.url))
+      }
+
+   
+
 
       if (
         url.pathname === '/' ||

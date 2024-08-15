@@ -1,4 +1,4 @@
-import { onLoginUser } from '@/actions/auth'
+import { onLoginUser } from '@/actions/adminAuth'
 import { useToast } from '../../components/ui/use-toast'
 import { UserLoginProps, UserLoginSchema } from '../../schemas/auth.schema'
 import { useSignIn } from '@clerk/nextjs'
@@ -16,6 +16,8 @@ export const useSignInForm = () => {
     resolver: zodResolver(UserLoginSchema),
     mode: 'onChange',
   })
+
+
   const onHandleSubmit = methods.handleSubmit(
     async (values: UserLoginProps) => {
       if (!isLoaded) return
@@ -36,7 +38,8 @@ export const useSignInForm = () => {
           })
 
        
-            router.push('/dashboard')
+        
+            router.push('/admin/dashboard')
 
           
     

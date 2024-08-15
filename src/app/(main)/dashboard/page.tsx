@@ -24,6 +24,8 @@ import Link from "next/link";
 import React from "react";
 import { currentUser } from "@clerk/nextjs";
 import { client } from "@/lib/prisma";
+import { format } from "date-fns";
+import { TotalDepo, TotalWithdraw } from "@/lib/queries";
 
 type Props = {};
 
@@ -35,8 +37,6 @@ const Page = async (props: Props) => {
   // const transactions = await getUserTransactions()
   // const products = await getUserTotalProductPrices()
 
-
-
   const authUser = await currentUser();
   if (!authUser) return null;
 
@@ -44,10 +44,27 @@ const Page = async (props: Props) => {
     where: {
       clerkId: authUser.id,
     },
-  
+  });
+  if (!getBalance) return null;
+
+  const getAllTransaction = await client.transaction.findMany({
+    where: {
+      userId: authUser.id,
+    },
+    orderBy: {
+      createdAt: "desc", // Order by createdAt in descending order to get the latest deposits first
+    },
+    take: 4, // Limit the number of deposits to 4
   });
 
-  if (!getBalance) return null;
+  if (!getAllTransaction) return null;
+
+
+  const getNumberofDepo = await TotalDepo()
+
+  const getNumberofWithdraw = await TotalWithdraw()
+
+
 
   return (
     <>
@@ -61,20 +78,17 @@ const Page = async (props: Props) => {
             icon={<WalletIcon />}
           />
           <DashboardCard
-            value={0}
-            sales
+            value={getNumberofDepo}
             title="Total Deposit"
             icon={<DepositIcon />}
           />
           <DashboardCard
-            value={0}
-            sales
+            value={getNumberofWithdraw}
             title="Total Withdraw"
             icon={<WithdrawalIcon />}
           />
           <DashboardCard
             value={0}
-            
             title="Total Referrals"
             icon={<ReferralsIcon />}
           />
@@ -103,44 +117,66 @@ const Page = async (props: Props) => {
               </p>
             </div>
             <Separator orientation="horizontal" />
-            {/* {transactions &&
-              transactions.data.map((transaction) => (
-                <div
-                  className="flex gap-3 w-full justify-between items-center border-b-2 py-5"
-                  key={transaction.id}
-                >
-                  <p className="font-bold">
-                    {transaction.calculated_statement_descriptor}
-                  </p>
-                  <p className="font-bold text-xl">
-                    ${transaction.amount / 100}
-                  </p>
-                </div>
-              
-              ))} */}
+            {getAllTransaction &&
+              getAllTransaction.map((transaction) => {
+                const formattedDate = format(
+                  new Date(transaction.createdAt),
+                  "yyyy-MM-dd HH:mm:ss"
+                );
 
-            <div className=" w-full justify-between items-center border-b-2 py-5">
-              <div className="flex justify-between">
-                <div className="flex gap-3">
-                  <Avatar>
-                    <AvatarFallback>DE</AvatarFallback>
-                  </Avatar>
+                return (
+                  <div
+                    key={transaction.userId}
+                    className=" w-full justify-between items-center border-b-2 py-5"
+                  >
+                    <div className="flex justify-between">
+                      <div className="flex gap-3">
+                        <Avatar>
+                          <AvatarFallback>
+                            {transaction.type.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
 
-                  <div>
-                    <p className="text-sm font-bold"> Deposit Funds</p>
-                    <div className="flex gap-5">
-                      <p className="text-sm text-gray-400"> 22 feb 2024</p>
-                      <p className="text-sm text-gray-400"> Money Sent</p>
+                        <div>
+                          <p className="text-sm font-bold">
+                            {" "}
+                            {transaction.type} FUNDS
+                          </p>
+                          <div className="flex gap-5">
+                            <p className="text-sm text-gray-400">
+                              {" "}
+                              {formattedDate}
+                            </p>
+                            <p className="text-sm text-gray-400"> 
+                               {transaction.type === "DEPOSIT" ? (
+
+                                <p> Money Deposited</p>
+
+                               ): (
+
+                                <p> Money Withdrawn</p>
+                               )}
+                               </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        {transaction.type === "DEPOSIT" ? (
+                          <p className="text-sm text-green-600">
+                            + {transaction.amount} {transaction.currency}{" "}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-red-600">
+                            - {transaction.amount} {transaction.currency}{" "}
+                          </p>
+                        ) }
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <p className="text-sm text-green-600"> +200 USD</p>
-                </div>
-              </div>
-            </div>
+                );
+              })}
 
-
+            {/* 
             <div className=" w-full justify-between items-center border-b-2 py-5">
               <div className="flex justify-between">
                 <div className="flex gap-3">
@@ -160,8 +196,7 @@ const Page = async (props: Props) => {
                   <p className="text-sm text-red-600"> -500 USD</p>
                 </div>
               </div>
-            </div>
-
+            </div> */}
           </div>
         </div>
       </div>

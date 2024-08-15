@@ -3,9 +3,21 @@ import Image from "next/image";
 import React from "react";
 import { Separator } from "../ui/separator";
 import WithdrawForm from "./WithdrawForm";
+import { currentUser } from "@clerk/nextjs";
+import { client } from "@/lib/prisma";
 
 
-const WithdrawSec = () => {
+const WithdrawSec =  async () => {
+
+  const authUser = await currentUser();
+  if (!authUser) return null;
+
+  const getBalance = await client.user.findUnique({
+    where: {
+      clerkId: authUser.id,
+    },
+  });
+  if (!getBalance) return null;
   return (
     <div className="flex  flex-col md:flex-row gap-10">
       <div className=" rounded-lg border-l-black border-l-[5px] flex flex-col gap-3 pr-10 pl-10 py-10 md:pl-10 md:pr-20 border-[1px] border-border bg-cream h-[40%] dark:bg-muted md:w-[30%] w-full">
@@ -14,7 +26,7 @@ const WithdrawSec = () => {
 
           <div className="">
             <div className="flex gap-2 mt-4">
-              <p className="text-2xl font-bold"> 0.00 </p>
+              <p className="text-2xl font-bold"> {getBalance.balance}.00 </p>
               <p className="mt-1"> USD</p>
             </div>
             <p className="text-sm font-normal">Available </p>

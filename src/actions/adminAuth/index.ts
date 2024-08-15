@@ -5,39 +5,33 @@ import { currentUser, redirectToSignIn } from '@clerk/nextjs'
 import { redirect } from 'next/navigation'
 
 export const onCompleteUserRegistration = async (
+
   fullname: string,
   clerkId: string,
   type: string,
   email: string,
   password: string
-
 ) => {
-  console.log('Starting onCompleteUserRegistration with:', { fullname, clerkId, type, email, password });
+  console.log('Starting onCompleteUserRegistration with:', {fullname, clerkId, type, email, password });
 
   try {
     console.log('Attempting to create user in database');
-    const registered = await client.user.create({
+    const registered = await client.admin.create({
       data: {
+     
         fullname,
         clerkId,
         type,
         email,
         password,
+        id: clerkId
 
-        profile: {
-          create: {
-            clerkId: clerkId,
-            fullName: fullname,
-            email: email,
-           id: clerkId
-
-          }
-        }
       },
       select: {
         fullname: true,
         id: true,
-        type: true,
+        type: true
+        
       },
     });
 
@@ -104,12 +98,13 @@ export const onCompleteUserRegistration = async (
 export const onLoginUser = async () => {
 
   const user = await currentUser()
-  if (!user) redirect('/sign-in')
+  if (!user) redirect('/auth/admin/auth/sign-in')
+
   else {
     try {
-      const authenticated = await client.user.findUnique({
+      const authenticated = await client.admin.findUnique({
         where: {
-          clerkId: user.id,
+          id: user.id,
         },
         select: {
           fullname: true,
@@ -127,37 +122,11 @@ export const onLoginUser = async () => {
   }
 }
 
-
-export const AdminLoginUser = async () => {
-
-  const user = await currentUser()
-  if (!user) redirect('/admin/auth/sign-in')
-
-  else {
-    try {
-      const authenticated = await client.admin.findUnique({
-        where: {
-          id: user.id,
-        },
-        select: {
-          fullname: true,
-          id: true,
-      
-        },
-      })
-      if (authenticated) {
-    
-        return { status: 200, user: authenticated }
-      }
-    } catch (error) {
-      return { status: 400 }
-    }
-  }
-}
 export const UserId = async () => {
 
   const user = await currentUser()
-  if (!user) redirect('/sign-in')
+  if (!user) redirect('/admin/sign-in')
+
   else {
     try {
       const authenticated = await client.user.findUnique({
