@@ -89,7 +89,7 @@ const WithdrawalTransactions: React.FC = () => {
   const handleApprove = async (id: string) => {
     try {
       await approveWithdraw(id);
-      // Refresh the transactions list
+
       const updatedTransactions = await getAllWithdraw();
       setAllTransactions(updatedTransactions);
 
