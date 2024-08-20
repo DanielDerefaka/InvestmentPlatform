@@ -688,6 +688,59 @@ export const getAllWithdraw = async () => {
 };
 
 
+export const approveWithdraw = async (id: string) => {
+  try {
+    const updatedWithdraw = await client.withdrawal.update({
+      where: { id },
+      data: { status: 'COMPLETED' },
+    });
+
+    const updateTransacDepo = await client.transaction.update({
+      where: { id },
+      data: { status: 'COMPLETED' },
+    });
+
+    // Update user balance
+ if(updatedWithdraw){
+  await client.user.update({
+    where: { clerkId: updatedWithdraw.userId },
+    data: {
+      balance: {
+        decrement: parseFloat(updatedWithdraw.amount),
+      },
+    },
+  });
+ }
+
+    return updatedWithdraw;
+  } catch (error) {
+    console.error('Error approving deposit:', error);
+    throw error;
+  }
+};
+
+export const rejectWithdraw = async (id: string) => {
+  try {
+    const updatedDeposit = await client.withdrawal.update({
+      where: { id },
+      data: { status: 'FAILED' },
+
+
+    });
+
+
+    const updateTransacDepo = await client.transaction.update({
+      where: { id },
+      data: { status: 'FAILED' },
+    });
+
+    return updatedDeposit;
+  } catch (error) {
+    console.error('Error rejecting withdrawal:', error);
+    throw error;
+  }
+};
+
 
 
 export const getAllTrans = async () => {
@@ -760,9 +813,6 @@ export async function getUserDetails(userId: string) {
 }
 
 
-
-
-
 export const handleActive = async (id: string) => {
   try {
     const updateStats = await client.user.update({
@@ -795,4 +845,3 @@ export const handlesus = async (id: string) => {
     throw error;
   }
 };
-
