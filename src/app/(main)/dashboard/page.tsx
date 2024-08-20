@@ -59,12 +59,9 @@ const Page = async (props: Props) => {
 
   if (!getAllTransaction) return null;
 
+  const getNumberofDepo = await TotalDepo();
 
-  const getNumberofDepo = await TotalDepo()
-
-  const getNumberofWithdraw = await TotalWithdraw()
-
-
+  const getNumberofWithdraw = await TotalWithdraw();
 
   return (
     <>
@@ -147,16 +144,13 @@ const Page = async (props: Props) => {
                               {" "}
                               {formattedDate}
                             </p>
-                            <p className="text-sm text-gray-400"> 
-                               {transaction.type === "DEPOSIT" ? (
-
+                            <p className="text-sm text-gray-400">
+                              {transaction.type === "DEPOSIT" ? (
                                 <p> Money Deposited</p>
-
-                               ): (
-
+                              ) : (
                                 <p> Money Withdrawn</p>
-                               )}
-                               </p>
+                              )}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -169,7 +163,7 @@ const Page = async (props: Props) => {
                           <p className="text-sm text-red-600">
                             - {transaction.amount} {transaction.currency}{" "}
                           </p>
-                        ) }
+                        )}
                       </div>
                     </div>
                   </div>

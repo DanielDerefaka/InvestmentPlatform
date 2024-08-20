@@ -20,6 +20,7 @@ model User {
   profile           Profile?
   transactions      Transaction[]
   deposits          Deposit[]
+  status            Actions @default(ACTIVE)
   withdrawals       Withdrawal[]
   investments       Investment[]
   kyc               KYCVerification?
@@ -52,7 +53,7 @@ model Transaction {
   id          String      @id @default(uuid())
   user        User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
   userId      String
-  amount      String?
+  amount      Float
   type        TransactionType   // 'deposit', 'withdrawal', 'investment'
   currency    String?
   status      TransactionStatus
@@ -60,20 +61,7 @@ model Transaction {
  
 }
 
-// model Deposit {
-//   id          String     @id @default(uuid())
-  
-//   amount      String
-//   currency    String
-//   status      TransactionStatus   // 'pending', 'completed', 'failed'
-//   createdAt   DateTime @default(now())
 
-//    userId  String?
-//   User   User?   @relation(fields: [userId], references: [id],  onDelete: Cascade)
-
-//   @@index([userId])
-
-// }
 
 model Deposit {
   id        String         @id @default(uuid())
@@ -224,6 +212,12 @@ enum VerificationStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum Actions {
+  ACTIVE
+  LOCKED
+  SUSPENDED
 }
 
 enum Role {

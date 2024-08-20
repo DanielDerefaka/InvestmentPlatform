@@ -18,7 +18,7 @@ import {
   SelectValue,
   SelectGroup,
 } from "@/components/ui/select";
-import { getAllTransaction } from "@/lib/queries";
+import { getAllTrans, getAllTransaction } from "@/lib/queries";
 import { format } from "date-fns";
 import { TransactionStatus, TransactionType } from "@prisma/client";
 
@@ -33,19 +33,23 @@ interface Transaction {
   amount: number;
   status: TransactionStatus;
   createdAt: string;
+  user: {
+    fullname: string;
+  }
+  currency: string;
   // Add other fields as necessary
 }
 
 type FilterType = "all" | TransactionType;
 
-const TransactionsTable: React.FC = () => {
+const AdminTransaction: React.FC = () => {
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      const transactions = await getAllTransaction();
+      const transactions = await getAllTrans();
       setAllTransactions(transactions);
     };
     fetchTransactions();
@@ -101,7 +105,9 @@ const TransactionsTable: React.FC = () => {
             <TableHead className="px-2">Type</TableHead>
             <TableHead className="px-2">Amount</TableHead>
             <TableHead className="px-2">Status</TableHead>
+            <TableHead className="px-2 ">User</TableHead>
             <TableHead className="px-2 ">Date</TableHead>
+
             {/* <TableHead className="px-2 max-md:hidden">Category</TableHead> */}
           </TableRow>
         </TableHeader>
@@ -133,6 +139,7 @@ const TransactionsTable: React.FC = () => {
                 <TableCell className={statusColor}>
                   {transaction.status}
                 </TableCell>
+                <TableCell>{transaction.user.fullname}</TableCell>
                 <TableCell>{formattedDate}</TableCell>
                
           
@@ -169,4 +176,6 @@ const TransactionsTable: React.FC = () => {
   );
 };
 
-export default TransactionsTable;
+// export default TransactionsTable;
+
+export default AdminTransaction

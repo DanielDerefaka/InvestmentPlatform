@@ -40,7 +40,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { IconTruckLoading } from "@tabler/icons-react";
-import { CreateWithdraw } from "@/lib/queries";
+import { CreateWithdraw, getBalance } from "@/lib/queries";
 import { v4 } from "uuid";
 import { Spinner } from "../spinner";
 
@@ -74,29 +74,52 @@ const WithdrawForm = () => {
   //   }, [data]);
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    try {
-      await CreateWithdraw({
-        id: v4(),
-        amount: values.amount,
-        walletAddress: values.walletAddress,
-        status: "PENDING",
-        createdAt: new Date(),
-        userId: "",
-      });
 
-      toast({
-        title: "Withdrawal Sucessful",
-      });
-
-      router.push("/dashboard");
-    } catch (error) {
-      console.log(error);
+    const getbal = await getBalance();
+    const check = getbal?.balance;
+    
+    if (check !== undefined && check !== null) {
+      if (check < parseFloat(values.amount)) {
+        toast({
+          variant: "destructive",
+          title: "Oops!",
+          description: "Check your balance",
+        });
+      } else {
+        try {
+          await CreateWithdraw({
+            id: v4(),
+            amount: values.amount,
+            walletAddress: values.walletAddress,
+            status: "PENDING",
+            createdAt: new Date(),
+            userId: "",
+          });
+    
+          toast({
+            title: "Withdrawal Sucessful",
+          });
+    
+          router.push("/dashboard");
+        } catch (error) {
+          console.log(error);
+          toast({
+            variant: "destructive",
+            title: "Oppse!",
+            description: "could not make a deposit",
+          });
+        }
+      }
+    } else {
+      // Handle the case where balance is undefined or null
       toast({
         variant: "destructive",
-        title: "Oppse!",
-        description: "could not make a deposit",
+        title: "Error",
+        description: "Unable to retrieve balance",
       });
     }
+    
+   
   };
 
   return (

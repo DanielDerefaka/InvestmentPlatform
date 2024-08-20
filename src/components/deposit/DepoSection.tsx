@@ -55,7 +55,7 @@ const DepositForm: React.FC<Props> = ({ data }) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: data?.amount?.toString() || "",
-      currency: data?.currency || "USD",
+      currency: data?.currency || "USDT",
     },
   });
 
@@ -65,7 +65,7 @@ const DepositForm: React.FC<Props> = ({ data }) => {
     if (data) {
       form.reset({
         amount: data.amount?.toString() || "",
-        currency: data.currency || "USD",
+        currency: data.currency || "USDT",
       });
     }
   }, [data, form]);
@@ -74,6 +74,8 @@ const DepositForm: React.FC<Props> = ({ data }) => {
 
     const user = await UserId();
     console.log(user?.user?.clerkId)
+
+
 
     try {
       await DepositCall({
@@ -143,9 +145,9 @@ const DepositForm: React.FC<Props> = ({ data }) => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="GBP">GBP</SelectItem>
+                          <SelectItem value="USDT">USDT</SelectItem>
+                          <SelectItem value="EUR">BTC</SelectItem>
+                          <SelectItem value="GBP">ETH</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

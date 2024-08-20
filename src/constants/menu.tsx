@@ -1,17 +1,20 @@
 import CalIcon from '@/icons/cal-icon'
 import ChatIcon from '@/icons/chat-icon'
+import { FileIcon } from '@/icons/content-icon'
 import DashboardIcon from '@/icons/dashboard-icon'
 import { DepositIcon } from '@/icons/deposit-icon'
 import EmailIcon from '@/icons/email-icon'
 import HelpDeskIcon from '@/icons/help-desk-icon'
 import IntegrationsIcon from '@/icons/integrations-icon'
 import { InvestmentIcon } from '@/icons/investment-icon'
+import { MenuIcon } from '@/icons/menu-dashboard'
 import { OurPlansIcon } from '@/icons/Ourplans-icon'
 import { MyProfileIcon } from '@/icons/profile-icon'
 import SettingsIcon from '@/icons/settings-icon'
 import StarIcon from '@/icons/star-icon'
 import TimerIcon from '@/icons/timer-icon'
 import {TransactionsIcon}  from '@/icons/transactions-icon'
+import { VerificationIcon } from '@/icons/verification-icon'
 import { WithdrawalIcon } from '@/icons/withdrawal-icon'
 
 type SIDE_BAR_MENU_PROPS = {
@@ -62,6 +65,73 @@ export const SIDE_BAR_MENU:  SIDE_BAR_MENU_PROPS[] = [
     path: 'withdraw',
   },
 ]
+
+
+export const ADMIN_SIDE_BAR_MENU:  SIDE_BAR_MENU_PROPS[] = [
+  {
+    label: 'Dashboard',
+    icon: <MenuIcon/>,
+    path: 'admin/dashboard',
+  },
+
+  {
+    label: 'Deposit',
+    icon: <DepositIcon />,
+    path: 'admin/deposit',
+  },
+  {
+    label: 'Withdraw',
+    icon: <WithdrawalIcon />,
+    path: 'admin/withdraw',
+  },
+
+  {
+    label: 'Transaction',
+    icon: <TransactionsIcon />,
+    path: 'admin/transaction',
+  },
+  {
+    label: 'Investments',
+    icon: <InvestmentIcon />,
+    path: 'admin/investments',
+  },
+  {
+    label: 'Manage Users',
+    icon: <MyProfileIcon />,
+    path: 'admin/users',
+  },
+
+  {
+    label: 'Verification Center',
+    icon: <VerificationIcon />,
+    path: 'admin/verify',
+  },
+  
+  {
+    label: 'Profile',
+    icon: <MyProfileIcon />,
+    path: 'admin/profile',
+  },
+  {
+    label: 'Investment Plans',
+    icon: <OurPlansIcon />,
+    path: 'admin/plans',
+  },
+
+  {
+    label: 'Manage Content',
+    icon: <FileIcon />,
+    path: 'admin/content',
+  },
+
+  {
+    label: 'Application Settings',
+    icon: <SettingsIcon />,
+    path: 'admin/settings',
+  },
+
+]
+
 
 type TABS_MENU_PROPS = {
   label: string
